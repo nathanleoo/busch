@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Duda</title>
+  <style>
+    body {
+      margin: 0;
+      background: #fff;
+      font-family: sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .character {
+      width: 220px;
+      height: auto;
+      margin-right: 0;
+      user-select: none;
+      animation: piscar 3s infinite;
+    }
+
+    @keyframes piscar {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .heart-grid {
+      display: grid;
+      grid-template-columns: repeat(11, 22px);
+      grid-gap: 6px;
+      position: relative;
+      width: max-content;
+      height: max-content;
+    }
+
+    .heart-cell {
+      width: 22px;
+      height: 22px;
+      font-size: 20px;
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.7);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .heart-cell.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .flying-heart {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      font-size: 20px;
+      pointer-events: none;
+      user-select: none;
+      transform: translate(0, 0) scale(1);
+      transition: transform 0.4s ease-out, opacity 0.4s ease;
+      opacity: 1;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <img src="832741dd-be72-4461-b83f-a1ba9b4cd600.png" alt="Personagem" class="character" id="character" />
+  <div class="heart-grid" id="heartGrid"></div>
+</div>
+
+<script>
+  const heartPattern = [
+    "00100100100",
+    "01111111110",
+    "11111111111",
+    "11111111111",
+    "01111111110",
+    "00111111100",
+    "00011111000",
+    "00001110000",
+    "00000100000"
+  ];
+
+  const grid = document.getElementById("heartGrid");
+  const character = document.getElementById("character");
+
+  const heartCells = [];
+
+  heartPattern.forEach(row => {
+    for (let char of row) {
+      const cell = document.createElement("div");
+      cell.className = "heart-cell";
+      cell.textContent = char === "1" ? "❤️" : "";
+      grid.appendChild(cell);
+      if (char === "1") heartCells.push(cell);
+    }
+  });
+
+  function getHandPosition() {
+    const rect = character.getBoundingClientRect();
+    return {
+      x: rect.left + rect.width * 0.63,
+      y: rect.top + rect.height * 0.30
+    };
+  }
+
+    function animateHearts() {
+    const handPos = getHandPosition();
+
+    heartCells.forEach((cell, i) => {
+      setTimeout(() => {
+        const flyingHeart = document.createElement("div");
+        flyingHeart.className = "flying-heart";
+        flyingHeart.textContent = "❤️";
+        document.body.appendChild(flyingHeart);
+
+        flyingHeart.style.left = `${handPos.x}px`;
+        flyingHeart.style.top = `${handPos.y}px`;
+
+        flyingHeart.getBoundingClientRect();
+
+        const cellRect = cell.getBoundingClientRect();
+        const deltaX = cellRect.left - handPos.x;
+        const deltaY = cellRect.top - handPos.y;
+
+        flyingHeart.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.2)`;
+        flyingHeart.style.opacity = "0";
+
+        setTimeout(() => {
+          cell.classList.add("visible");
+          flyingHeart.remove();
+        }, 400); // mais rápido
+      }, i * 70); // menor intervalo entre corações
+    });
+  }
+
+
+  window.onload = () => {
+    animateHearts();
+  };
+</script>
+
+</body>
+</html>
